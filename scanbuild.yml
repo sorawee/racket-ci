@@ -1,0 +1,278 @@
+# THIS FILE IS AUTO-GENERATED. PLEASE DO NOT EDIT IT.
+# GENERATED FROM: scanbuild.rkt
+# GENERATED TIME: Sunday, May 22nd, 2022 12:22:30pm
+name:
+  "LLVM Static Analysis"
+on:
+  "push"
+permissions:
+  security-events:
+    "write"
+jobs:
+  scanbuild-racketcgc:
+    runs-on:
+      "ubuntu-20.04"
+    container:
+      "pmatos/scan-build:12.0.1"
+    steps:
+      - name:
+          "Install dependencies"
+        run:
+          |-
+            apt-get update
+            apt-get install -y libffi-dev unzip python libxml2-dev libfindbin-libs-perl make gcc g++ git tree jq moreutils
+      - uses:
+          "actions/checkout@v3"
+        with:
+          fetch-depth:
+            100
+      - name:
+          "Configure Racket CGC"
+        working-directory:
+          "./racket/src"
+        run:
+          |-
+            ./configure CFLAGS='-O0 -g' CPPFLAGS='-DMZ_PRECISE_RETURN_SPEC' --disable-docs --enable-pthread --enable-cgcdefault --prefix=${{ runner.temp }}/racketcgc --disable-strip --enable-werror --enable-cify --enable-jit --enable-foreign --enable-places --enable-futures --enable-float
+      - name:
+          "Scan Build"
+        working-directory:
+          "./racket/src"
+        run:
+          |-
+            scan-build -sarif -o ../../racketcgc-report -analyzer-config 'crosscheck-with-z3=true' make -j$(($(nproc) + 1)) cgc
+      - name:
+          "Move SARIF results"
+        run:
+          |-
+            mkdir sarif-files
+            find racketcgc-report -type f -name '*.sarif' -exec cp \{\} sarif-files/ \;
+      - name:
+          "Adjust tool name"
+        working-directory:
+          "sarif-files"
+        run:
+          |-
+            ../.github/scripts/adjust-sarif-tool.sh cgc
+      - name:
+          "Create file list"
+        working-directory:
+          "sarif-files"
+        run:
+          |-
+            find . -type f -name '*.sarif' > list.txt
+            split -d -l15 list.txt list.
+      - uses:
+          "actions/upload-artifact@v3"
+        name:
+          "scanbuild-cgc-${{ github.sha }}"
+        path:
+          "sarif-files"
+  scanbuild-racket3m:
+    runs-on:
+      "ubuntu-20.04"
+    container:
+      "pmatos/scan-build:12.0.1"
+    steps:
+      - name:
+          "Install dependencies"
+        run:
+          |-
+            apt-get update
+            apt-get install -y libffi-dev unzip python libxml2-dev libfindbin-libs-perl make gcc g++ git tree jq moreutils
+      - uses:
+          "actions/checkout@v3"
+        with:
+          fetch-depth:
+            100
+      - name:
+          "Speed build and install racketcgc"
+        working-directory:
+          "./racket/src"
+        run:
+          |-
+            ./configure --enable-cgcdefault --prefix=/usr
+            export cpus=$(grep -c ^processor /proc/cpuinfo)
+            make -j$((cpus+1))
+            make -j$((cpus+1)) install
+      - name:
+          "Clean repo"
+        run:
+          |-
+            git clean -xdf
+      - name:
+          "Configure Racket 3m"
+        working-directory:
+          "./racket/src"
+        run:
+          |-
+            ./configure CFLAGS='-O0 -g' CPPFLAGS='-DMZ_PRECISE_RETURN_SPEC' --disable-docs --enable-pthread --enable-bcdefault --enable-racket=/usr/bin/racket --disable-strip --enable-werror --enable-cify --enable-jit --enable-foreign --enable-places --enable-futures --enable-float
+      - name:
+          "Scan Build"
+        working-directory:
+          "./racket/src"
+        run:
+          |-
+            scan-build -sarif -o ../../racket3m-report -analyzer-config 'crosscheck-with-z3=true' make -j$(($(nproc) + 1)) 3m
+      - name:
+          "Move SARIF results"
+        run:
+          |-
+            mkdir sarif-files
+            find racket3m-report -type f -name '*.sarif' -exec cp \{\} sarif-files/ \;
+      - name:
+          "Adjust tool name"
+        working-directory:
+          "sarif-files"
+        run:
+          |-
+            ../.github/scripts/adjust-sarif-tool.sh 3m
+      - name:
+          "Create file list"
+        working-directory:
+          "sarif-files"
+        run:
+          |-
+            find . -type f -name '*.sarif' > list.txt
+            split -d -l15 list.txt list.
+      - uses:
+          "actions/upload-artifact@v3"
+        name:
+          "scanbuild-cgc-${{ github.sha }}"
+        path:
+          "sarif-files"
+  scanbuild-racketcs:
+    runs-on:
+      "ubuntu-20.04"
+    container:
+      "pmatos/scan-build:12.0.1"
+    steps:
+      - name:
+          "Install dependencies"
+        run:
+          |-
+            apt-get update
+            apt-get install -y libffi-dev unzip python libxml2-dev libfindbin-libs-perl make gcc g++ git tree jq moreutils
+      - uses:
+          "actions/checkout@v3"
+        with:
+          fetch-depth:
+            100
+      - name:
+          "Speed build and install racketcgc"
+        working-directory:
+          "./racket/src"
+        run:
+          |-
+            ./configure --enable-cgcdefault --prefix=/usr
+            export cpus=$(grep -c ^processor /proc/cpuinfo)
+            make -j$((cpus+1))
+            make -j$((cpus+1)) install
+      - name:
+          "Clean repo"
+        run:
+          |-
+            git clean -xdf
+      - name:
+          "Configure Racket 3m"
+        working-directory:
+          "./racket/src"
+        run:
+          |-
+            ./configure CFLAGS='-O0 -g' CPPFLAGS='-DMZ_PRECISE_RETURN_SPEC' --disable-docs --enable-pthread --enable-csdefault --enable-csonly --enable-racket=/usr/bin/racket --enable-compress
+      - name:
+          "Scan Build"
+        working-directory:
+          "./racket/src"
+        run:
+          |-
+            scan-build -sarif -o ../../racketcs-report -analyzer-config 'crosscheck-with-z3=true' make -j$(($(nproc) + 1)) cs
+      - name:
+          "Move SARIF results"
+        run:
+          |-
+            mkdir sarif-files
+            find racketcs-report -type f -name '*.sarif' -exec cp \{\} sarif-files/ \;
+      - name:
+          "Adjust tool name"
+        working-directory:
+          "sarif-files"
+        run:
+          |-
+            ../.github/scripts/adjust-sarif-tool.sh cs
+      - name:
+          "Create file list"
+        working-directory:
+          "sarif-files"
+        run:
+          |-
+            find . -type f -name '*.sarif' > list.txt
+            split -d -l15 list.txt list.
+      - uses:
+          "actions/upload-artifact@v3"
+        name:
+          "scanbuild-cgc-${{ github.sha }}"
+        path:
+          "sarif-files"
+  upload:
+    runs-on:
+      "ubuntu-20.04"
+    needs:
+      - "scanbuild-racketcgc"
+      - "scanbuild-racket3m"
+      - "scanbuild-racketcs"
+    strategy:
+      matrix:
+        variants:
+          - "cgc"
+          - "3m"
+          - "cs"
+        chunks:
+          - "00"
+          - "01"
+          - "02"
+          - "03"
+          - "04"
+    steps:
+      - uses:
+          "actions/checkout@v3"
+        with:
+          fetch-depth:
+            100
+      - uses:
+          "actions/download-artifact@v3"
+        with:
+          name:
+            "scanbuild-${{ matrix.variants }}-${{ github.sha }}"
+      - name:
+          "Test for presence of the chunk"
+        id:
+          "chunk_presence"
+        run:
+          |-
+            if [[ -e "list.${{ matrix.chunks }}" ]]
+            then
+            echo '::set-output name=presence::1'
+            else
+            echo '::set-output name=presence::0'
+            fi
+      - name:
+          "Partition the chunk"
+        run:
+          |-
+            mkdir workspace
+            for file in $(cat list.${{ matrix.chunks }})
+            do
+            mv "$file" workspace
+            done
+        if:
+          "steps.chunk_presence.outputs.presence == '1'"
+      - uses:
+          "github/codeql-action/upload-sarif@v2"
+        name:
+          "Upload SARIF"
+        sarif-file:
+          "workspace"
+        category:
+          "scanbuild-${{ matrix.variants }}-${{ matrix.chunks }}-${{ github.sha }}"
+        if:
+          "steps.chunk_presence.outputs.presence == '1'"
