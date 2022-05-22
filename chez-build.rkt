@@ -1,7 +1,7 @@
 #lang at-exp racket
 
-(require "lib.rkt"
-         "common.rkt")
+(require "lib/lib.rkt"
+         "lib/common.rkt")
 
 (def RELEVANT-PATHS
   ($map [paths: ($list "racket/src/ChezScheme/**"

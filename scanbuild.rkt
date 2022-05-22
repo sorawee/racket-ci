@@ -1,7 +1,7 @@
 #lang at-exp racket
 
-(require "lib.rkt"
-         "common.rkt")
+(require "lib/lib.rkt"
+         "lib/common.rkt")
 
 (def INSTALLS
   (s "libffi-dev"
@@ -36,8 +36,6 @@
      "--disable-docs"
      "--enable-pthread"
      . xs))
-
-
 
 (def ($make-scanbuild #:variant variant #:instructions xs)
   [($make-key @t{scanbuild-racket@|variant|})
@@ -79,7 +77,6 @@
 
             ($map [name: "Create file list"]
                   [working-directory: "sarif-files"]
-
                   ($run "find . -type f -name '*.sarif' > list.txt"
                         "split -d -l15 list.txt list."))
 

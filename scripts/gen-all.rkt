@@ -7,7 +7,7 @@
   (drop (string-split s "\n") 3))
 
 (for ([file files])
-  (define out (path-replace-extension file ".yml"))
+  (define out (build-path "out" (path-replace-extension file ".yml")))
   (printf "Processing ~a..." out)
   (flush-output)
   (define s (with-output-to-string (λ () (dynamic-require file #f))))
