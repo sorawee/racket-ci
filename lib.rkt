@@ -142,7 +142,8 @@
     [x:string
      #:when block?
      (display (syntax-e #'x))]
-    [x:string (printf "~s" (syntax-e #'x))]))
+    [x:string (printf "~s" (syntax-e #'x))]
+    [x:boolean (display (if (syntax-e #'x) "true" "false"))]))
 
 (define (pp d)
   (pretty d 0 #f))

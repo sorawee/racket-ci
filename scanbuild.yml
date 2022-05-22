@@ -1,6 +1,6 @@
 # THIS FILE IS AUTO-GENERATED. PLEASE DO NOT EDIT IT.
 # GENERATED FROM: scanbuild.rkt
-# GENERATED TIME: Sunday, May 22nd, 2022 12:22:30pm
+# GENERATED TIME: Sunday, May 22nd, 2022 3:02:02pm
 name:
   "LLVM Static Analysis"
 on:
@@ -249,7 +249,7 @@ jobs:
           "chunk_presence"
         run:
           |-
-            if [[ -e "list.${{ matrix.chunks }}" ]]
+            if [[ -e "list.${{ matrix.chunks }}"]]
             then
             echo '::set-output name=presence::1'
             else
