@@ -15,6 +15,7 @@
 
          $when
          $set-output
+         $get-output
          $run
          $actions/checkout
          $actions/upload-artifact
@@ -165,28 +166,30 @@
                                     (syntax-e #'val)))
   result)
 
+(def ($get-output id:string key:string)
+  #:with result (adjust-loc (format "steps.~a.outputs.~a"
+                                    (syntax-e #'id)
+                                    (syntax-e #'key)))
+  result)
+
 (def ($run t:string ...)
   [run: ($block t ...)])
 
 (def ($actions/checkout {~args :: #:fetch-depth fetch-depth:number})
-  ($map
-   [uses: "actions/checkout@v3"]
-   [with: ($map [fetch-depth: {~? fetch-depth 100}])]))
+  ($map [uses: "actions/checkout@v3"]
+        [with: ($map [fetch-depth: {~? fetch-depth 100}])]))
 
 ;; name :: string?
 ;; path :: string?
 (def ($actions/upload-artifact {~args #:name name:string #:path path:string})
-  ($map
-   [uses: "actions/upload-artifact@v3"]
-   [name: name]
-   [path: path]))
+  ($map [uses: "actions/upload-artifact@v3"]
+        [with: ($map [name: name]
+                     [path: path])]))
 
 ;; name :: string?
 (def ($actions/download-artifact {~args #:name name:string})
-  ($map
-   [uses: "actions/download-artifact@v3"]
-   [with: ($map
-           [name: name])]))
+  ($map [uses: "actions/download-artifact@v3"]
+        [with: ($map [name: name])]))
 
 (def ($github/codeql-action/upload-sarif {~args #:name name:string
                                                 #:sarif-file sarif-file:string

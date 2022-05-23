@@ -17,17 +17,22 @@
      "jq"
      "moreutils"))
 
-(def CLEAN-REPO
-  ($map [name: "Clean repo"]
-        ($run "git clean -xdf")))
+(def BC-CONFIGURE-OPTIONS
+  {~@ "--disable-strip"
+      "--enable-werror"
+      "--enable-cify"
+      "--enable-jit"
+      "--enable-foreign"
+      "--enable-places"
+      "--enable-futures"
+      "--enable-float"})
 
-(def SPEED-BUILD-CGC
+(def STEP:SPEED-BUILD-CGC
   ($map [name: "Speed build and install racketcgc"]
         [working-directory: "./racket/src"]
         ($run "./configure --enable-cgcdefault --prefix=/usr"
-              "export cpus=$(grep -c ^processor /proc/cpuinfo)"
-              "make -j$((cpus+1))"
-              "make -j$((cpus+1)) install")))
+              "make -j$(($((nproc)) + 1))"
+              "make -j$(($((nproc)) + 1)) install")))
 
 (def ($configure-invocation xs ...)
   (s "./configure"
@@ -40,7 +45,7 @@
 (def ($make-scanbuild {~args #:variant variant #:instructions xs})
   [($make-key @t{scanbuild-racket@|variant|})
    ($map
-    RUNS-ON
+    CLAUSE:RUNS-ON:DEFAULT
     [container: "pmatos/scan-build:12.0.1"]
     [steps:
      ($list ($map [name: "Install dependencies"]
@@ -101,41 +106,25 @@
             ($run ($configure-invocation
                    "--enable-cgcdefault"
                    "--prefix=${{ runner.temp }}/racketcgc"
-
-                   "--disable-strip"
-                   "--enable-werror"
-                   "--enable-cify"
-                   "--enable-jit"
-                   "--enable-foreign"
-                   "--enable-places"
-                   "--enable-futures"
-                   "--enable-float")))])
+                   BC-CONFIGURE-OPTIONS)))])
 
     ($make-scanbuild
      #:variant "3m"
      #:instructions
-     [SPEED-BUILD-CGC
-      CLEAN-REPO
+     [STEP:SPEED-BUILD-CGC
+      STEP:CLEAN-REPO
       ($map [name: "Configure Racket 3m"]
             [working-directory: "./racket/src"]
             ($run ($configure-invocation
                    "--enable-bcdefault"
                    "--enable-racket=/usr/bin/racket"
-
-                   "--disable-strip"
-                   "--enable-werror"
-                   "--enable-cify"
-                   "--enable-jit"
-                   "--enable-foreign"
-                   "--enable-places"
-                   "--enable-futures"
-                   "--enable-float")))])
+                   BC-CONFIGURE-OPTIONS)))])
 
     ($make-scanbuild
      #:variant "cs"
      #:instructions
-     [SPEED-BUILD-CGC
-      CLEAN-REPO
+     [STEP:SPEED-BUILD-CGC
+      STEP:CLEAN-REPO
       ($map [name: "Configure Racket 3m"]
             [working-directory: "./racket/src"]
             ($run ($configure-invocation
@@ -146,7 +135,7 @@
 
     [upload:
      ($map
-      RUNS-ON
+      CLAUSE:RUNS-ON:DEFAULT
       [needs:
        ($list "scanbuild-racketcgc" "scanbuild-racket3m" "scanbuild-racketcs")]
       [strategy:
@@ -173,7 +162,7 @@
 
         {~@
          .
-         ($when "steps.chunk_presence.outputs.presence == '1'"
+         ($when @t{@($get-output "chunk_presence" "presence") == '1'}
 
                 ($map [name: "Partition the chunk"]
                       ($run "mkdir workspace"

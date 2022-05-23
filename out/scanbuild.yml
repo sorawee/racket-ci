@@ -62,10 +62,11 @@ jobs:
             split -d -l15 list.txt list.
       - uses:
           "actions/upload-artifact@v3"
-        name:
-          "scanbuild-cgc-${{ github.sha }}"
-        path:
-          "sarif-files"
+        with:
+          name:
+            "scanbuild-cgc-${{ github.sha }}"
+          path:
+            "sarif-files"
   scanbuild-racket3m:
     runs-on:
       "ubuntu-20.04"
@@ -90,9 +91,8 @@ jobs:
         run:
           |-
             ./configure --enable-cgcdefault --prefix=/usr
-            export cpus=$(grep -c ^processor /proc/cpuinfo)
-            make -j$((cpus+1))
-            make -j$((cpus+1)) install
+            make -j$(($((nproc)) + 1))
+            make -j$(($((nproc)) + 1)) install
       - name:
           "Clean repo"
         run:
@@ -135,10 +135,11 @@ jobs:
             split -d -l15 list.txt list.
       - uses:
           "actions/upload-artifact@v3"
-        name:
-          "scanbuild-cgc-${{ github.sha }}"
-        path:
-          "sarif-files"
+        with:
+          name:
+            "scanbuild-cgc-${{ github.sha }}"
+          path:
+            "sarif-files"
   scanbuild-racketcs:
     runs-on:
       "ubuntu-20.04"
@@ -163,9 +164,8 @@ jobs:
         run:
           |-
             ./configure --enable-cgcdefault --prefix=/usr
-            export cpus=$(grep -c ^processor /proc/cpuinfo)
-            make -j$((cpus+1))
-            make -j$((cpus+1)) install
+            make -j$(($((nproc)) + 1))
+            make -j$(($((nproc)) + 1)) install
       - name:
           "Clean repo"
         run:
@@ -208,10 +208,11 @@ jobs:
             split -d -l15 list.txt list.
       - uses:
           "actions/upload-artifact@v3"
-        name:
-          "scanbuild-cgc-${{ github.sha }}"
-        path:
-          "sarif-files"
+        with:
+          name:
+            "scanbuild-cgc-${{ github.sha }}"
+          path:
+            "sarif-files"
   upload:
     runs-on:
       "ubuntu-20.04"

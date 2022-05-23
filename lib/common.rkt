@@ -1,12 +1,17 @@
 #lang at-exp racket
 
-(provide RUNS-ON
-         IF-RACKET-REPO)
+(provide CLAUSE:RUNS-ON:DEFAULT
+         CLAUSE:IF-RACKET-REPO
+         STEP:CLEAN-REPO)
 
 (require "lib.rkt")
 
-(def RUNS-ON
+(def CLAUSE:RUNS-ON:DEFAULT
   [runs-on: "ubuntu-20.04"])
 
-(def IF-RACKET-REPO
+(def CLAUSE:IF-RACKET-REPO
   [if: "github.repository == 'racket/racket'"])
+
+(def STEP:CLEAN-REPO
+  ($map [name: "Clean repo"]
+        ($run "git clean -xdf")))

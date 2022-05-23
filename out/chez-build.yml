@@ -60,7 +60,7 @@ jobs:
       - name:
           "Install libs for 64-bit"
         if:
-          "matrix.mach == 'i3le' || matrix.mach == 'ti3le'"
+          "matrix.mach == 'a6le' || matrix.mach == 'ta6le'"
         run:
           |-
             sudo apt-get update

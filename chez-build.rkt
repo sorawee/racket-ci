@@ -3,13 +3,13 @@
 (require "lib/lib.rkt"
          "lib/common.rkt")
 
-(def RELEVANT-PATHS
+(def CLAUSE:RELEVANT-PATHS
   ($map [paths: ($list "racket/src/ChezScheme/**"
                        ".github/scripts/**"
                        ".github/workflows/chez-build.yml"
                        "Makefile")]))
 
-(def BUILD-AND-TEST
+(def STEPS:BUILD-AND-TEST
   {~@ ($map [name: "Build Chez with PB boot files"]
             [working-directory: "racket/src/ChezScheme"]
             ($run "./configure --pb"
@@ -27,13 +27,13 @@
 (process
  ($map
   [name: "Solo Chez Build"]
-  [on: ($map [push: RELEVANT-PATHS]
-             [pull_request: RELEVANT-PATHS])]
+  [on: ($map [push: CLAUSE:RELEVANT-PATHS]
+             [pull_request: CLAUSE:RELEVANT-PATHS])]
   [jobs:
    ($map
     [build-linux:
      ($map
-      RUNS-ON
+      CLAUSE:RUNS-ON:DEFAULT
       [strategy:
        ($map [fail-fast: #f]
              [matrix: ($map [mach: ($list "i3le" "ti3le" "a6le" "ta6le")])])]
@@ -58,14 +58,14 @@
 
         ($map
          [name: "Install libs for 64-bit"]
-         [if: "matrix.mach == 'i3le' || matrix.mach == 'ti3le'"]
+         [if: "matrix.mach == 'a6le' || matrix.mach == 'ta6le'"]
          ($run "sudo apt-get update"
                "sudo apt-get install -y libncurses5-dev libssl-dev libx11-dev"))
 
-        BUILD-AND-TEST)])]
+        STEPS:BUILD-AND-TEST)])]
 
     [build-arm64:
-     ($map IF-RACKET-REPO
+     ($map CLAUSE:IF-RACKET-REPO
            [runs-on: ($list "self-hosted" "ARM64" "Linux")]
            [container:
             ($map [image: "racket/racket-ci:latest"]
@@ -77,4 +77,4 @@
                    ($map [name: "Download pb boot files"]
                          ($run "make fetch-pb"))
 
-                   BUILD-AND-TEST)])])]))
+                   STEPS:BUILD-AND-TEST)])])]))
