@@ -1,6 +1,5 @@
 # THIS FILE IS AUTO-GENERATED. PLEASE DO NOT EDIT IT.
 # GENERATED FROM: scanbuild.rkt
-# GENERATED TIME: Sunday, May 22nd, 2022 3:02:02pm
 name:
   "LLVM Static Analysis"
 on:

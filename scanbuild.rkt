@@ -29,15 +29,15 @@
               "make -j$((cpus+1))"
               "make -j$((cpus+1)) install")))
 
-(def ($configure-invocation . xs)
+(def ($configure-invocation xs ...)
   (s "./configure"
      "CFLAGS='-O0 -g'"
      "CPPFLAGS='-DMZ_PRECISE_RETURN_SPEC'"
      "--disable-docs"
      "--enable-pthread"
-     . xs))
+     xs ...))
 
-(def ($make-scanbuild #:variant variant #:instructions xs)
+(def ($make-scanbuild {~args #:variant variant #:instructions xs})
   [($make-key @t{scanbuild-racket@|variant|})
    ($map
     RUNS-ON

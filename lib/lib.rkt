@@ -4,6 +4,7 @@
          s
          t
          adjust-loc
+         ~args
 
          $list
          $map
@@ -22,7 +23,6 @@
 
 (require racket/syntax
          racket/splicing
-         racket/date
          syntax/parse/define
          syntax/parse/experimental/template
          syntax/parse
@@ -155,7 +155,6 @@
 
   (begin (displayln "# THIS FILE IS AUTO-GENERATED. PLEASE DO NOT EDIT IT.")
          (printf "# GENERATED FROM: ~a\n" 'path)
-         (printf "# GENERATED TIME: ~a\n" (date->string (current-date) #t))
          (pp #'x)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
